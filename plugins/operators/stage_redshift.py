@@ -53,7 +53,7 @@ class StageToRedshiftOperator(BaseOperator):
 
         :param context:
         """
-        self.log.info('StageToRedshiftOperator not implemented yet')
+        self.log.info('StageToRedshiftOperator execute')
 
         aws_hook = AwsHook(self.aws_credentials_id)
         credentials = aws_hook.get_credentials()
@@ -65,6 +65,7 @@ class StageToRedshiftOperator(BaseOperator):
         self.log.info("Copying data from S3 to Redshift")
         rendered_key = self.s3_key.format(**context)
         s3_path = "s3://{}/{}".format(self.s3_bucket, rendered_key)
+        self.log.info('StageToRedshiftOperator s3_path: ' + s3_path)
         formatted_sql = StageToRedshiftOperator.copy_sql.format(
             self.table,
             s3_path,
@@ -74,8 +75,3 @@ class StageToRedshiftOperator(BaseOperator):
             self.delimiter
         )
         redshift.run(formatted_sql)
-
-
-
-
-

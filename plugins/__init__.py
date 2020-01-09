@@ -2,8 +2,8 @@ from __future__ import division, absolute_import, print_function
 
 from airflow.plugins_manager import AirflowPlugin
 
-from . import operators
-from . import helpers
+import plugins.operators
+import plugins.helpers
 
 # Defining the plugin class
 class UdacityPlugin(AirflowPlugin):
