@@ -28,11 +28,10 @@ to many kinds of data pipelines with Redshift and with other databases.
 ## Stage Operator
 The stage operator is expected to be able to load any JSON formatted files from S3 to Amazon Redshift. The operator 
 creates and runs a SQL COPY statement based on the parameters provided. The operator's parameters should specify where 
-    in S3 the file is loaded and what is the target table.
+in S3 the file is loaded and what is the target table.
 
-The parameters should be used to distinguish between JSON file. Another important requirement of the stage operator is
- containing a templated field that allows it 
-to load timestamped files from S3 based on the execution time and run backfills.
+The parameters should be used to distinguish between JSON file. Another important requirement of the stage operator is 
+containing a templated field that allows it to load timestamped files from S3 based on the execution time and run backfills.
 
 ## Fact and Dimension Operators
 With dimension and fact operators, you can utilize the provided SQL helper class to run data transformations. Most of 
