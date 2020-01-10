@@ -6,7 +6,7 @@ from airflow.operators import (StageToRedshiftOperator, LoadFactOperator,
                                LoadDimensionOperator, DataQualityOperator)
 from helpers import SqlQueries
 
-from airflow.operators.postgres_operator import PostgresOperator
+from airflow.operators import PostgresOperator
 
 # AWS_KEY = os.environ.get('AWS_KEY')
 # AWS_SECRET = os.environ.get('AWS_SECRET')
@@ -15,7 +15,7 @@ default_args = {
     'owner': 'udacity',
     'start_date': datetime(2019, 1, 12),
     'depends_on_past': False,
-    'retries': 3,
+    'retries': 0,
     'retry_delay': timedelta(minutes=5),
     'email_on_retry': False
 }
@@ -34,7 +34,7 @@ create_tables = PostgresOperator(
     task_id="create_tables",
     dag=dag,
     postgres_conn_id="redshift",
-    sql="airflow/create_tables.sql"
+    sql="create_tables.sql"
 )
 
 stage_events_to_redshift = StageToRedshiftOperator(
@@ -43,7 +43,8 @@ stage_events_to_redshift = StageToRedshiftOperator(
     redshift_conn_id="redshift",
     aws_credentials_id="aws_credentials",
     s3_bucket="udacity-dend",
-    s3_key="log_data/{execution_date.year}/{execution_date.month}/*.json",
+    #s3_key="log_data/{execution_date.year}/{execution_date.month}",
+    s3_key="log_data/2018/11",
     table="staging_events"
 )
 
@@ -53,7 +54,8 @@ stage_songs_to_redshift = StageToRedshiftOperator(
     redshift_conn_id="redshift",
     aws_credentials_id="aws_credentials",
     s3_bucket="udacity-dend",
-    s3_key="song_data/**/*.json",
+    s3_key="song_data/A/A/A",
+    copy_json_option='auto',
     table="staging_songs"
 )
 
@@ -97,9 +99,13 @@ load_time_dimension_table = LoadDimensionOperator(
     sql_select_stmt=SqlQueries.time_table_insert
 )
 
+
 run_quality_checks = DataQualityOperator(
     task_id='Run_data_quality_checks',
-    dag=dag
+    dag=dag,
+    redshift_conn_id="redshift",
+    table="time",
+    column="hour"
 )
 
 end_operator = DummyOperator(task_id='Stop_execution',  dag=dag)
