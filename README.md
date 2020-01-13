@@ -1,4 +1,4 @@
-# Project: Data Pipelines
+# Project: Data Pipelines with Airflow
 
 ## Intro
 
