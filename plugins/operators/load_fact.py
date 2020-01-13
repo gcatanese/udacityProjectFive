@@ -3,6 +3,13 @@ from airflow.models import BaseOperator
 from airflow.utils.decorators import apply_defaults
 
 class LoadFactOperator(BaseOperator):
+    """
+    Loads the Fact table
+
+    :param redshift_conn_id: Redshift connection ID
+    :param table_name: Table name
+    :param sql_select_stmt: SQL statement which performs the loading of the data
+    """
 
     ui_color = '#F98866'
 
@@ -12,6 +19,13 @@ class LoadFactOperator(BaseOperator):
                  table_name="",
                  sql_select_stmt="",
                  *args, **kwargs):
+        """
+        Initialise the operator
+
+        :param redshift_conn_id: Redshift connection ID
+        :param table_name: Table name
+        :param sql_select_stmt: SQL statement which performs the loading of the data
+        """
 
         super(LoadFactOperator, self).__init__(*args, **kwargs)
 
@@ -21,6 +35,12 @@ class LoadFactOperator(BaseOperator):
 
 
     def execute(self, context):
+        """
+        Executes the operator logic
+
+        :param context:
+        """
+
         self.log.info('Loading Fact table ' + self.table_name)
 
         redshift_hook = PostgresHook(self.redshift_conn_id)

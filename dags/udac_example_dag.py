@@ -8,9 +8,6 @@ from helpers import SqlQueries
 
 from airflow.operators import PostgresOperator
 
-# AWS_KEY = os.environ.get('AWS_KEY')
-# AWS_SECRET = os.environ.get('AWS_SECRET')
-
 default_args = {
     'owner': 'udacity',
     'start_date': datetime(2019, 1, 12),
@@ -45,6 +42,7 @@ stage_events_to_redshift = StageToRedshiftOperator(
     s3_bucket="udacity-dend",
     #s3_key="log_data/{execution_date.year}/{execution_date.month}",
     s3_key="log_data/2018/11",
+    format_as_json='s3://udacity-dend/log_json_path.json',
     table="staging_events"
 )
 
@@ -55,7 +53,7 @@ stage_songs_to_redshift = StageToRedshiftOperator(
     aws_credentials_id="aws_credentials",
     s3_bucket="udacity-dend",
     s3_key="song_data/A/A/A",
-    copy_json_option='auto',
+    format_as_json='auto',
     table="staging_songs"
 )
 

@@ -3,6 +3,13 @@ from airflow.models import BaseOperator
 from airflow.utils.decorators import apply_defaults
 
 class LoadDimensionOperator(BaseOperator):
+    """
+    Loads the Dimension table
+
+    :param redshift_conn_id: Redshift connection ID
+    :param table_name: Table name
+    :param sql_select_stmt: SQL statement which performs the loading of the data
+    """
 
     ui_color = '#80BD9E'
 
@@ -12,6 +19,13 @@ class LoadDimensionOperator(BaseOperator):
                  table_name="",
                  sql_select_stmt="",
                  *args, **kwargs):
+        """
+        Initialise the operator
+
+        :param redshift_conn_id: Redshift connection ID
+        :param table_name: Table name
+        :param sql_select_stmt: SQL statement which performs the loading of the data
+        """
 
         super(LoadDimensionOperator, self).__init__(*args, **kwargs)
 
@@ -20,6 +34,12 @@ class LoadDimensionOperator(BaseOperator):
         self.sql_select_stmt = sql_select_stmt
 
     def execute(self, context):
+        """
+        Executes the operator logic
+
+        :param context:
+        """
+
         self.log.info('Loading Dimension table ' + self.table_name)
 
         redshift_hook = PostgresHook(self.redshift_conn_id)

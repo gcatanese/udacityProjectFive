@@ -1,9 +1,21 @@
 from airflow.hooks.postgres_hook import PostgresHook
-from airflow.contrib.hooks.aws_hook import AwsHook
 from airflow.models import BaseOperator
 from airflow.utils.decorators import apply_defaults
 
+from airflow.contrib.hooks.aws_hook import AwsHook
+
 class StageToRedshiftOperator(BaseOperator):
+    """
+    Copies the data from S3 into the staging table
+
+        :param redshift_conn_id: Redshift connection ID
+        :param aws_credentials_id: AWS connection ID
+        :param table: Name of the staging table
+        :param s3_bucket: Name of the bucket with the JSON data
+        :param s3_key: Path of the JSON files within the bucket
+        :param format_as_json: Value of FORMAT_AS_JSON option: 'auto' for auto mapping, path to JSONPaths file
+    """
+
     ui_color = '#358140'
 
     template_fields = ("s3_key",)
@@ -12,8 +24,9 @@ class StageToRedshiftOperator(BaseOperator):
         FROM '{}'
         ACCESS_KEY_ID '{}'
         SECRET_ACCESS_KEY '{}'
-        IGNOREHEADER {}
-        DELIMITER '{}'
+        FORMAT AS JSON '{}'
+        TIMEFORMAT as 'epochmillisecs'
+        COMPUPDATE OFF
     """
 
     @apply_defaults
@@ -23,36 +36,35 @@ class StageToRedshiftOperator(BaseOperator):
                  table="",
                  s3_bucket="",
                  s3_key="",
-                 delimiter=",",
-                 ignore_headers=1,
+                 format_as_json=",",
                  *args, **kwargs):
         """
+        Initialise the operator
 
-        :param redshift_conn_id:
-        :param aws_credentials_id:
-        :param table:
-        :param s3_bucket:
-        :param s3_key:
-        :param delimiter:
-        :param ignore_headers:
-        :param args:
-        :param kwargs:
+        :param redshift_conn_id: Redshift connection ID
+        :param aws_credentials_id: AWS connection ID
+        :param table: Name of the staging table
+        :param s3_bucket: Name of the bucket with the JSON data
+        :param s3_key: Path of the JSON files within the bucket
+        :param format_as_json: Value of FORMAT_AS_JSON option: 'auto' for auto mapping, path to JSONPaths file
         """
+
         super(StageToRedshiftOperator, self).__init__(*args, **kwargs)
 
         self.table = table
         self.redshift_conn_id = redshift_conn_id
         self.s3_bucket = s3_bucket
         self.s3_key = s3_key
-        self.delimiter = delimiter
-        self.ignore_headers = ignore_headers
+        self.format_as_json = format_as_json
         self.aws_credentials_id = aws_credentials_id
 
     def execute(self, context):
         """
+        Executes the operator logic
 
         :param context:
         """
+
         self.log.info('StageToRedshiftOperator execute')
 
         aws_hook = AwsHook(self.aws_credentials_id)
@@ -71,7 +83,6 @@ class StageToRedshiftOperator(BaseOperator):
             s3_path,
             credentials.access_key,
             credentials.secret_key,
-            self.ignore_headers,
-            self.delimiter
+            self.format_as_json
         )
         redshift.run(formatted_sql)
