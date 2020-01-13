@@ -43,7 +43,7 @@ class DataQualityOperator(BaseOperator):
         self.log.info(f'Validating table {self.table}')
 
         redshift_hook = PostgresHook(self.redshift_conn_id)
-        records = redshift_hook.get_records(f"SELECT COUNT(*) FROM {self.table} WHERE {self.column} IS NULL")
+        records = redshift_hook.get_records(f"SELECT COUNT(*) FROM {self.table} WHERE {self.column} IS NOT NULL")
         if len(records) < 1 or len(records[0]) < 1:
             raise ValueError(f"Data quality check failed. Table '{self.table}' contained no row")
         num_records = records[0][0]
